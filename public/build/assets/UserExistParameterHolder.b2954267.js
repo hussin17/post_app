@@ -1,0 +1,1 @@
+class t{constructor(){this.id="",this.google_id="",this.email="",this.facebook_id="",this.loginMethod=""}UserExistParameterHolder(){this.id="",this.google_id="",this.email="",this.facebook_id="",this.loginMethod=""}toMap(){const i={};return i.id=this.id,i.google_id=this.google_id,i.email=this.email,i.facebook_id=this.facebook_id,i.loginMethod=this.loginMethod,i}}export{t as U};
