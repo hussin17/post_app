@@ -19,17 +19,23 @@ class BlogApiResource extends JsonResource
     public function toArray($request)
     {
         return [
-            'id' => isset($this->id)?(string)$this->id:'',
-            'name' => isset($this->name)?(string)$this->name:'',
-            'description' => isset($this->description)?(string)$this->description:'',
-            'location_city_id' => isset($this->location_city_id)?(string)$this->location_city_id:'',
-            'shop_id' => isset($this->shop_id)?(string)$this->shop_id:'',
-            'status' => isset($this->status)?(string)$this->status:'',
-            "city" => new LocationCityApiResource(isset($this->city) && $this->city ? $this->whenLoaded('city'): LocationCity::where(LocationCity::id, 0)->get()),
-            "default_photo" => new CoreImageApiResource(isset($this->cover[0]) && $this->cover[0] ? $this->cover[0]: CoreImage::where(CoreImage::id, 0)->get()),
-            "added_date_str" => isset($this->added_date)?(string)$this->added_date->diffForHumans():'',
-            'added_date' => isset($this->added_date)?(string)$this->added_date:'',
-            "is_empty_object" => $this->when(!isset($this->id),1),
+            'id' => isset($this->id) ? (string)$this->id : '',
+            'name' => isset($this->name) ? (string)$this->name : '',
+            'description' => isset($this->description) ? (string)$this->description : '',
+            'location_city_id' => isset($this->location_city_id) ? (string)$this->location_city_id : '',
+            'shop_id' => isset($this->shop_id) ? (string)$this->shop_id : '',
+            'status' => isset($this->status) ? (string)$this->status : '',
+            "city" => new LocationCityApiResource(isset($this->city) && $this->city ? $this->whenLoaded('city') : LocationCity::where(LocationCity::id, 0)->get()),
+            "default_photo" => new CoreImageApiResource(isset($this->cover[0]) && $this->cover[0] ? $this->cover[0] : CoreImage::where(CoreImage::id, 0)->get()),
+            "added_date_str" => isset($this->added_date) ? (string)$this->added_date->diffForHumans() : '',
+            'added_date' => isset($this->added_date) ? (string)$this->added_date : '',
+            "is_empty_object" => $this->when(!isset($this->id), 1),
+
+            // !
+            'link' => isset($this->link) ? $this->link : '',
+            'link_type' => isset($this->link_type) ? $this->link_type : '',
+            'type' => isset($this->type) ? $this->type : '',
+            'category_id' => isset($this->category_id) ? $this->category_id : '',
         ];
     }
 }

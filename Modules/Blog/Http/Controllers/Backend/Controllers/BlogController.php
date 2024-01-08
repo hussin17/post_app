@@ -51,11 +51,13 @@ class BlogController extends Controller
         // if (!empty($checkPermission)){
         //     return $checkPermission;
         // }
+        // dd($dataArr);
         return renderView(self::createPath, $dataArr);
     }
 
     public function store(Request $request)
     {
+        // dd($request->all());
         // validation start
         $errors = validateForCustomField($this->code, $request->blog_relation);
 

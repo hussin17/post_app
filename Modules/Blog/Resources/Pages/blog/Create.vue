@@ -23,8 +23,9 @@
                                 <ps-label class="text-base">{{ $t('blog_photo_label') }}</ps-label>
                                 <ps-label-title-3>{{ $t('core__be_recommended_size_400_200') }}</ps-label-title-3>
                                 <ps-image-upload uploadType="image" v-model:imageFile="form.cover" />
-                                <ps-label-caption textColor="text-red-500 " class="block mt-2">{{ errors.cover
-                                }}</ps-label-caption>
+                                <ps-label-caption textColor="text-red-500 " class="block mt-2">
+                                    {{ errors.cover }}
+                                </ps-label-caption>
                             </div>
 
                             <div v-for="(coreField, index) in coreFieldFilterSettings.filter((coreField) => coreField.original_field_name === 'name' && coreField.enable === 1 && coreField.is_delete === 0)"
@@ -52,19 +53,28 @@
                                     class="block mt-2">{{ errors.link }}</ps-label-caption>
                             </div>
                             <!-- Link Type -->
-                            <div>
-
-                            </div>
-                            <!-- banner type -->
                             <div v-for="(coreField, index) in coreFieldFilterSettings.filter((coreField) => coreField.original_field_name === 'link_type' && coreField.enable === 1 && coreField.is_delete === 0)"
                                 :key="index">
                                 <ps-label class="text-base">{{ $t(coreField.label_name) }}
                                     <span v-if="coreField.mandatory == 1" class="font-medium text-red-800 ms-1">*</span>
                                 </ps-label>
-                                <ps-input ref="link" type="text" v-model:value="form.link"
-                                    :placeholder="$t(coreField.placeholder)" />
-                                <ps-label-caption v-if="coreField.mandatory == 1" textColor="text-red-500 "
-                                    class="block mt-2">{{ errors.link }}</ps-label-caption>
+                                <select v-model="link_type" @change="onSelectChange(link_type)"
+                                    style="width: 100%; border:1px solid #DDD">
+                                    <option value="inner">داخلي</option>
+                                    <option value="outer">خارجي</option>
+                                </select>
+                            </div>
+                            <!-- banner type -->
+                            <div v-for="(coreField, index) in coreFieldFilterSettings.filter((coreField) => coreField.original_field_name === 'type' && coreField.enable === 1 && coreField.is_delete === 0)"
+                                :key="index">
+                                <ps-label class="text-base">{{ $t(coreField.label_name) }}
+                                    <span v-if="coreField.mandatory == 1" class="font-medium text-red-800 ms-1">*</span>
+                                </ps-label>
+                                <select v-model="type" @change="onTypeChange(type)"
+                                    style="width: 100%; border:1px solid #DDD">
+                                    <option value="main">رئيسي</option>
+                                    <option value="category">قسم</option>
+                                </select>
                             </div>
                             <!-- category_id -->
                             <div v-for="(coreField, index) in coreFieldFilterSettings.filter((coreField) => coreField.original_field_name === 'category_id' && coreField.enable === 1 && coreField.is_delete === 0)"
@@ -72,10 +82,10 @@
                                 <ps-label class="text-base">{{ $t(coreField.label_name) }}
                                     <span v-if="coreField.mandatory == 1" class="font-medium text-red-800 ms-1">*</span>
                                 </ps-label>
-                                <ps-input ref="category_id" type="text" v-model:value="form.category_id"
-                                    :placeholder="$t(coreField.placeholder)" />
-                                <ps-label-caption v-if="coreField.mandatory == 1" textColor="text-red-500 "
-                                    class="block mt-2">{{ errors.category_id }}</ps-label-caption>
+                                <select style="width: 100%" v-model="catID" @change="onCategoryChange(catID)">
+                                    <option v-for="category in categories" :value="category.id">{{ category.name }}
+                                    </option>
+                                </select>
                             </div>
 
                             <!-- for location city dropdown -->
@@ -206,7 +216,7 @@ export default defineComponent({
         PsImageUpload
     },
     layout: PsLayout,
-    props: ["errors", "cities", "coreFieldFilterSettings"],
+    props: ["errors", "cities", "coreFieldFilterSettings", 'categories'],
     data() {
         return {
             location_city: ""
@@ -229,7 +239,6 @@ export default defineComponent({
             }
         };
 
-
         const validateEmptyInput = (fieldName, fieldValue, errorMessage = "") => {
             props.errors[fieldName] = !fieldValue ? isEmpty(fieldName, fieldValue, errorMessage) : "";
             // if(fieldName == 'title'){
@@ -246,6 +255,10 @@ export default defineComponent({
             location_city_id: "",
             status: true,
             cover: '',
+            link: "",
+            link_type: "",
+            type: "",
+            category_id: "",
         });
 
         function handleSubmit() {
@@ -296,6 +309,20 @@ export default defineComponent({
         handleCancel() {
             this.$inertia.get(route("blog.index"));
         },
+        // Link Type
+        onSelectChange(link_type) {
+            this.form.link_type = link_type;
+            console.log("After onSelectChange " + this.form.link_type);
+        },
+        onTypeChange(type) {
+            this.form.type = type;
+            console.log("After onSelectChange " + this.form.type);
+            // TODO: If type == 'category' then the categories block will be activated
+        },
+        onCategoryChange(catID) {
+            this.form.category_id = catID;
+            console.log("After onSelectChange " + this.form.category_id);
+        }
     },
 });
 </script>

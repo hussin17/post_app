@@ -794,11 +794,11 @@ class ProductApiController extends Controller
                 'comment' => $request->comment
             ]);
             $res = [
-                'success' => true
+                'status' => true
             ];
         } else {
             $res = [
-                'success' => false
+                'status' => false
             ];
         }
         return $res;
@@ -810,16 +810,16 @@ class ProductApiController extends Controller
             $response = DB::table("psx_item_comments")->where('user_id', $request->login_user_id)->where('id', $request->id)->delete();
             if ($response) {
                 $res = [
-                    'success' => true
+                    'status' => true
                 ];
             } else {
                 $res = [
-                    'success' => false
+                    'status' => false
                 ];
             }
         } else {
             $res = [
-                'success' => false
+                'status' => false
             ];
         }
         return $res;

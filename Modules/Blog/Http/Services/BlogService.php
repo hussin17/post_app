@@ -93,12 +93,14 @@ class BlogService extends PsService
         //$checkPermission = $this->checkPermission($this->createAbility,Blog::class, "admin.index");
         // check permission end
         $cities = $this->locationCityService->getLocationCityList(null, $this->publish);
+        $categories = $this->categoryService->getCategories(null, $this->publish);
 
         $code = $this->code;
         $coreFieldFilterSettings = $this->getCoreFieldFilteredLists($code);
         $dataArr = [
             //"checkPermission" => $checkPermission,
             'cities' => $cities,
+            'categories' => $categories,
             'coreFieldFilterSettings' => $coreFieldFilterSettings
         ];
         return $dataArr;
@@ -605,6 +607,12 @@ class BlogService extends PsService
         $conds['location_city_id'] = $request->location_city_id;
         $conds['order_by'] = $request->order_by;
         $conds['order_type'] = $request->order_type;
+
+        // ! added By ME
+        $conds['link'] = $request->link;
+        $conds['link_type'] = $request->link_type;
+        $conds['type'] = $request->type;
+        $conds['category_id'] = $request->category_id;
 
         $blogApiRelation = $this->blogApiRelation;
         $blogs = $this->getBlogs($blogApiRelation, $this->publish, $limit, $offset, $conds);

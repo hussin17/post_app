@@ -34,7 +34,6 @@ class BlogApiController extends Controller
     {
         $response = $this->blogService->detailFromApi($request);
 
-
         if (isset($response['error'])) {
             return responseMsgApi($response['error'], $this->notFoundStatusCode);
         } else {
