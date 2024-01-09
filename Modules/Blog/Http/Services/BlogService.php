@@ -17,16 +17,18 @@ use Modules\Core\Http\Services\ImageService;
 use Modules\Core\Http\Services\LocationCityService;
 use Illuminate\Support\Facades\Gate;
 use Modules\Core\Http\Services\CategoryService;
+use Modules\Core\Http\Services\SubcategoryService;
 
 class BlogService extends PsService
 {
-    protected $categoryService, $locationCityNameCol, $locationCityIdCol, $locationCityTableName, $blogStatusCol, $coverImgType, $imageService, $blogIdCol, $coreImageImgParentIdCol, $publish, $unPublish, $coreImageImgTypeCol, $locationCityService, $blogApiRelation, $noContentStatusCode, $successStatus, $show, $hide, $delete, $unDelete, $viewAnyAbility, $createAbility, $editAbility, $deleteAbility, $code, $screenDisplayUiKeyCol, $screenDisplayUiIdCol, $screenDisplayUiIsShowCol, $coreFieldFilterModuleNameCol, $customUiIsDelCol;
+    protected $categoryService, $subCategoryService, $locationCityNameCol, $locationCityIdCol, $locationCityTableName, $blogStatusCol, $coverImgType, $imageService, $blogIdCol, $coreImageImgParentIdCol, $publish, $unPublish, $coreImageImgTypeCol, $locationCityService, $blogApiRelation, $noContentStatusCode, $successStatus, $show, $hide, $delete, $unDelete, $viewAnyAbility, $createAbility, $editAbility, $deleteAbility, $code, $screenDisplayUiKeyCol, $screenDisplayUiIdCol, $screenDisplayUiIsShowCol, $coreFieldFilterModuleNameCol, $customUiIsDelCol;
 
-    public function __construct(ImageService $imageService, LocationCityService $locationCityService, CategoryService $categoryService)
+    public function __construct(ImageService $imageService, LocationCityService $locationCityService, CategoryService $categoryService, SubcategoryService $subCategoryService)
     {
         $this->imageService = $imageService;
         $this->locationCityService = $locationCityService;
         $this->categoryService = $categoryService;
+        $this->subCategoryService = $subCategoryService;
 
         $this->blogIdCol = Blog::id;
         $this->blogStatusCol = Blog::status;
@@ -94,6 +96,7 @@ class BlogService extends PsService
         // check permission end
         $cities = $this->locationCityService->getLocationCityList(null, $this->publish);
         $categories = $this->categoryService->getCategories(null, $this->publish);
+        $subCategories = $this->subCategoryService->getSubcategories(null, $this->publish);
 
         $code = $this->code;
         $coreFieldFilterSettings = $this->getCoreFieldFilteredLists($code);
@@ -101,6 +104,7 @@ class BlogService extends PsService
             //"checkPermission" => $checkPermission,
             'cities' => $cities,
             'categories' => $categories,
+            'subCategories' => $subCategories,
             'coreFieldFilterSettings' => $coreFieldFilterSettings
         ];
         return $dataArr;
@@ -121,6 +125,13 @@ class BlogService extends PsService
             $blog->description = $request->description;
             $blog->location_city_id = $request->location_city_id;
             $blog->status = $request->status;
+
+            $blog->link = $request->link;
+            $blog->link_type = $request->link_type;
+            $blog->type = $request->type;
+            $blog->category_id = $request->category_id;
+            $blog->subCategory_id = $request->subCategory_id;
+
             $blog->added_user_id = Auth::user()->id;
             $blog->save();
 
@@ -148,6 +159,13 @@ class BlogService extends PsService
             $blog->description = $request->description;
             $blog->location_city_id = $request->location_city_id;
             $blog->status = $request->status;
+
+            $blog->link = $request->link;
+            $blog->link_type = $request->link_type;
+            $blog->type = $request->type;
+            $blog->category_id = $request->category_id;
+            $blog->subCategory_id = $request->subCategory_id;
+
             $blog->updated_user_id = Auth::user()->id;
             $blog->update();
 
@@ -219,6 +237,7 @@ class BlogService extends PsService
             ->when(empty($sort), function ($query, $conds) {
                 $query->orderBy($this->tableName . '.added_date', 'desc')->orderBy($this->tableName . '.' . $this->blogStatusCol, 'desc')->orderBy($this->tableName . '.' . $this->blogNameCol, 'asc');
             });
+
         if ($pagPerPage) {
             $blogs = $blogs->paginate($pagPerPage)->onEachSide(1)->withQueryString();
         } elseif ($noPagination) {
@@ -230,6 +249,7 @@ class BlogService extends PsService
 
     public function searching($query, $conds)
     {
+
         // search term
         if (isset($conds['searchterm']) && $conds['searchterm']) {
             $search = $conds['searchterm'];
@@ -249,6 +269,12 @@ class BlogService extends PsService
             $query->where($this->tableName . '.' . $this->itmAddedUserIdCol, $conds['added_user_id']);
         }
 
+        if (isset($conds['category_id'])) {
+            $query->where($this->tableName . '.' . 'category_id', $conds['category_id']);
+        }
+        if (isset($conds['subCategory_id'])) {
+            $query->where($this->tableName . '.' . 'subCategory_id', $conds['subCategory_id']);
+        }
 
         // order by
         if (isset($conds['order_by']) && isset($conds['order_type']) && $conds['order_by'] && $conds['order_type']) {
@@ -259,6 +285,7 @@ class BlogService extends PsService
                 $query->orderBy($conds['order_by'], $conds['order_type']);
             }
         }
+
 
         return $query;
     }
@@ -613,6 +640,7 @@ class BlogService extends PsService
         $conds['link_type'] = $request->link_type;
         $conds['type'] = $request->type;
         $conds['category_id'] = $request->category_id;
+        $conds['subCategory_id'] = $request->subCategory_id;
 
         $blogApiRelation = $this->blogApiRelation;
         $blogs = $this->getBlogs($blogApiRelation, $this->publish, $limit, $offset, $conds);

@@ -35,7 +35,8 @@ class BlogApiResource extends JsonResource
             'link' => isset($this->link) ? $this->link : '',
             'link_type' => isset($this->link_type) ? $this->link_type : '',
             'type' => isset($this->type) ? $this->type : '',
-            'category_id' => isset($this->category_id) ? $this->category_id : '',
+            'category_id' => isset($this->category_id) ? $this->category_id : 0,
+            'subCategory_id' => isset($this->subCategory_id) ? $this->subCategory_id : 0,
         ];
     }
 }

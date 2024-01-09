@@ -16,7 +16,7 @@ class Blog extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['id', 'name', 'description', 'location_city_id', 'shop_id', 'status', 'added_date', 'added_user_id', 'updated_date', 'updated_user_id', 'updated_flag'];
+    protected $fillable = ['id', 'category_id', 'subCategory_id', 'link', 'link_type', 'type', 'name', 'description', 'location_city_id', 'shop_id', 'status', 'added_date', 'added_user_id', 'updated_date', 'updated_user_id', 'updated_flag'];
 
     protected $table = "psx_blogs";
 

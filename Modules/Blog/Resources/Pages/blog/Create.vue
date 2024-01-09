@@ -87,6 +87,18 @@
                                     </option>
                                 </select>
                             </div>
+                            <!-- subCategory_id -->
+                            <div id="subcatID"
+                                v-for="(coreField, index) in coreFieldFilterSettings.filter((coreField) => coreField.original_field_name === 'subCategory_id' && coreField.enable === 1 && coreField.is_delete === 0)"
+                                v-if="newSubCatData.length > 0" :key="index" class="d-none">
+                                <ps-label class="text-base">{{ $t(coreField.label_name) }}
+                                    <span v-if="coreField.mandatory == 1" class="font-medium text-red-800 ms-1">*</span>
+                                </ps-label>
+                                <select style="width: 100%" v-model="subCatID" @change="onSubCategoryChange(subCatID)">
+                                    <option v-for="category in newSubCatData" :value="category.id">{{ category.name }}
+                                    </option>
+                                </select>
+                            </div>
 
                             <!-- for location city dropdown -->
                             <div v-for="(coreField, index) in coreFieldFilterSettings.filter((coreField) => coreField.original_field_name === 'location_city_id' && coreField.enable === 1 && coreField.is_delete === 0)"
@@ -216,7 +228,7 @@ export default defineComponent({
         PsImageUpload
     },
     layout: PsLayout,
-    props: ["errors", "cities", "coreFieldFilterSettings", 'categories'],
+    props: ["errors", "cities", "coreFieldFilterSettings", 'categories', 'subCategories'],
     data() {
         return {
             location_city: ""
@@ -228,6 +240,7 @@ export default defineComponent({
         const name = ref();
         const location_city_id = ref();
         const description = ref();
+        let newSubCatData = ref([]);
 
         // Client Side Validation
         const { isEmpty, minLength } = useValidators();
@@ -259,6 +272,7 @@ export default defineComponent({
             link_type: "",
             type: "",
             category_id: "",
+            subCategory_id: "",
         });
 
         function handleSubmit() {
@@ -283,7 +297,7 @@ export default defineComponent({
             });
         }
 
-        return { validateNameInput, validateEmptyInput, handleSubmit, form, loading, success, name, location_city_id, description };
+        return { validateNameInput, validateEmptyInput, handleSubmit, form, loading, success, name, location_city_id, description, newSubCatData };
     },
     computed: {
         breadcrumb() {
@@ -318,10 +332,21 @@ export default defineComponent({
             this.form.type = type;
             console.log("After onSelectChange " + this.form.type);
             // TODO: If type == 'category' then the categories block will be activated
+            if (this.form.type == 'main') {
+                this.onCategoryChange(0)
+            }
         },
         onCategoryChange(catID) {
             this.form.category_id = catID;
             console.log("After onSelectChange " + this.form.category_id);
+            // TODO: Call Api TO GET SubCategories
+            console.log("Befor subCategories ", this.subCategories);
+            this.newSubCatData = this.subCategories.filter((ele) => ele.category_id == catID);
+            console.log("After subCategories ", this.newSubCatData);
+        },
+        onSubCategoryChange(subCatID) {
+            this.form.subCategory_id = subCatID;
+            console.log("After onSelectChange " + this.form.subCategory_id);
         }
     },
 });

@@ -39,6 +39,7 @@ class SubcategoryController extends Controller
 
     public function index(Request $request)
     {
+
         $dataArr = $this->subcategoryService->index(self::indexRoute, $request);
         // dd($dataArr);
 
