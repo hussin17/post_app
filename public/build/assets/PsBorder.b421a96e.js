@@ -1,0 +1,1 @@
+import{_ as r}from"./plugin-vue_export-helper.21dcd24c.js";import{o,c as e}from"./app.89c3e968.js";import"https://checkout.razorpay.com/v1/checkout.js";const s={},t={class:"border-b border-fePrimary-500 mx-0 sm:mx-0"};function c(a,m,n,_,p,d){return o(),e("div",t)}var x=r(s,[["render",c]]);export{x as default};
