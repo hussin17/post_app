@@ -90,11 +90,9 @@ class BlogController extends Controller
             $validationArr['location_city_id'] = 'required';
         }
 
-
         if (in_array('description', $coreFieldsIds)) {
             $validationArr['description'] = 'required';
         }
-
 
         if (in_array('blog_photo', $coreFieldsIds)) {
             $validationArr['cover'] = 'nullable|sometimes|image';
@@ -104,7 +102,6 @@ class BlogController extends Controller
         $attributes['location_city_id'] = "Location City";
         // change custom attribute if required end
 
-
         $validator = Validator::make($request->all(), $validationArr, [], $attributes);
 
         if ($validator->fails()) {
@@ -112,7 +109,6 @@ class BlogController extends Controller
                 ->withErrors($validator)
                 ->withInput();
         } else {
-
             if (collect($errors)->isNotEmpty()) {
                 return redirect()->route(self::createRoute)->with('blog_relation_errors', $errors);
             }

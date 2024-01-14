@@ -26,6 +26,7 @@ class GetInTouchApiResource extends JsonResource
             'youtube' => isset($this->youtube) ? (string)$this->youtube : '',
             'pinterest' => isset($this->pinterest) ? (string)$this->pinterest : '',
             'twitter' => isset($this->twitter) ? (string)$this->twitter : '',
+            'about_website' => isset($this->about_website) ? (string)$this->about_website : '',
         ];
     }
 }

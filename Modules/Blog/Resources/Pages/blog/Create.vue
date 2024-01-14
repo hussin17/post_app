@@ -10,8 +10,9 @@
             <div class="rounded-xl ">
                 <!-- card header start -->
                 <div class="bg-primary-50 dark:bg-primary-900 py-2.5 ps-4 rounded-t-xl">
-                    <ps-label-header-6 textColor="text-secondary-800 dark:text-secondary-100">{{ $t('blog__be_blog_info')
-                    }}</ps-label-header-6>
+                    <ps-label-header-6 textColor="text-secondary-800 dark:text-secondary-100">
+                        {{ $t('blog__be_blog_info') }}
+                    </ps-label-header-6>
                 </div>
                 <!-- card header end -->
 
@@ -41,17 +42,6 @@
                                     class="block mt-2">{{ errors.name }}</ps-label-caption>
                             </div>
 
-                            <!-- Link -->
-                            <div v-for="(coreField, index) in coreFieldFilterSettings.filter((coreField) => coreField.original_field_name === 'link' && coreField.enable === 1 && coreField.is_delete === 0)"
-                                :key="index">
-                                <ps-label class="text-base">{{ $t(coreField.label_name) }}
-                                    <span v-if="coreField.mandatory == 1" class="font-medium text-red-800 ms-1">*</span>
-                                </ps-label>
-                                <ps-input ref="link" type="text" v-model:value="form.link"
-                                    :placeholder="$t(coreField.placeholder)" />
-                                <ps-label-caption v-if="coreField.mandatory == 1" textColor="text-red-500 "
-                                    class="block mt-2">{{ errors.link }}</ps-label-caption>
-                            </div>
                             <!-- Link Type -->
                             <div v-for="(coreField, index) in coreFieldFilterSettings.filter((coreField) => coreField.original_field_name === 'link_type' && coreField.enable === 1 && coreField.is_delete === 0)"
                                 :key="index">
@@ -64,6 +54,19 @@
                                     <option value="outer">خارجي</option>
                                 </select>
                             </div>
+
+                            <!-- Link -->
+                            <div v-for="(coreField, index) in coreFieldFilterSettings.filter((coreField) => coreField.original_field_name === 'link' && coreField.enable === 1 && coreField.is_delete === 0)"
+                                :key="index" v-if="form.link_type == 'outer'">
+                                <ps-label class="text-base">{{ $t(coreField.label_name) }}
+                                    <span v-if="coreField.mandatory == 1" class="font-medium text-red-800 ms-1">*</span>
+                                </ps-label>
+                                <ps-input ref="link" type="text" v-model:value="form.link"
+                                    :placeholder="$t(coreField.placeholder)" />
+                                <ps-label-caption v-if="coreField.mandatory == 1" textColor="text-red-500 "
+                                    class="block mt-2">{{ errors.link }}</ps-label-caption>
+                            </div>
+
                             <!-- banner type -->
                             <div v-for="(coreField, index) in coreFieldFilterSettings.filter((coreField) => coreField.original_field_name === 'type' && coreField.enable === 1 && coreField.is_delete === 0)"
                                 :key="index">
@@ -72,21 +75,25 @@
                                 </ps-label>
                                 <select v-model="type" @change="onTypeChange(type)"
                                     style="width: 100%; border:1px solid #DDD">
+                                    <option value="">اختر...</option>
                                     <option value="main">رئيسي</option>
                                     <option value="category">قسم</option>
                                 </select>
                             </div>
+
                             <!-- category_id -->
                             <div v-for="(coreField, index) in coreFieldFilterSettings.filter((coreField) => coreField.original_field_name === 'category_id' && coreField.enable === 1 && coreField.is_delete === 0)"
                                 v-if="form.type == 'category'" :key="index">
                                 <ps-label class="text-base">{{ $t(coreField.label_name) }}
                                     <span v-if="coreField.mandatory == 1" class="font-medium text-red-800 ms-1">*</span>
                                 </ps-label>
-                                <select style="width: 100%" v-model="catID" @change="onCategoryChange(catID)">
+                                <select required style="width: 100%" v-model="catID" @change="onCategoryChange(catID)">
+                                    <option value="">اختر...</option>
                                     <option v-for="category in categories" :value="category.id">{{ category.name }}
                                     </option>
                                 </select>
                             </div>
+
                             <!-- subCategory_id -->
                             <div id="subcatID"
                                 v-for="(coreField, index) in coreFieldFilterSettings.filter((coreField) => coreField.original_field_name === 'subCategory_id' && coreField.enable === 1 && coreField.is_delete === 0)"
@@ -94,10 +101,14 @@
                                 <ps-label class="text-base">{{ $t(coreField.label_name) }}
                                     <span v-if="coreField.mandatory == 1" class="font-medium text-red-800 ms-1">*</span>
                                 </ps-label>
-                                <select style="width: 100%" v-model="subCatID" @change="onSubCategoryChange(subCatID)">
+                                <select required style="width: 100%" v-model="subCatID"
+                                    @change="onSubCategoryChange(subCatID)">
+                                    <option value="">اختر...</option>
                                     <option v-for="category in newSubCatData" :value="category.id">{{ category.name }}
                                     </option>
                                 </select>
+                                <ps-label-caption v-if="coreField.mandatory == 1" textColor="text-red-500 "
+                                    class="block mt-2">{{ errors.subCategory_id }}</ps-label-caption>
                             </div>
 
                             <!-- for location city dropdown -->
@@ -228,7 +239,13 @@ export default defineComponent({
         PsImageUpload
     },
     layout: PsLayout,
-    props: ["errors", "cities", "coreFieldFilterSettings", 'categories', 'subCategories'],
+    props: [
+        "errors",
+        "cities",
+        "coreFieldFilterSettings",
+        'categories',
+        'subCategories'
+    ],
     data() {
         return {
             location_city: ""
@@ -249,6 +266,13 @@ export default defineComponent({
             props.errors[fieldName] = !fieldValue ? isEmpty(fieldName, fieldValue) : minLength(fieldName, fieldValue, 3);
             if (fieldName == 'name') {
                 name.value.isError = (!Boolean(props.errors.name)) ? false : true;
+            }
+        };
+
+        const validateSubCategory = (fieldName, fieldValue) => {
+            props.errors[fieldName] = !fieldValue ? isEmpty(fieldName, fieldValue) : minLength(fieldName, fieldValue, 3);
+            if (fieldName == 'subCategory_id') {
+                name.value.isError = (!Boolean(props.errors.subCategory_id)) ? false : true;
             }
         };
 
@@ -292,12 +316,11 @@ export default defineComponent({
                     loading.value = false;
                     name.value.isError = (!Boolean(props.errors.name)) ? false : true;
                     location_city_id.value.isError = (!Boolean(props.errors.location_city_id)) ? false : true;
-                    description.value.isError = (!Boolean(props.errors.description)) ? false : true;
                 },
             });
         }
 
-        return { validateNameInput, validateEmptyInput, handleSubmit, form, loading, success, name, location_city_id, description, newSubCatData };
+        return { validateNameInput, validateSubCategory, validateEmptyInput, handleSubmit, form, loading, success, name, location_city_id, description, newSubCatData };
     },
     computed: {
         breadcrumb() {
@@ -326,11 +349,9 @@ export default defineComponent({
         // Link Type
         onSelectChange(link_type) {
             this.form.link_type = link_type;
-            console.log("After onSelectChange " + this.form.link_type);
         },
         onTypeChange(type) {
             this.form.type = type;
-            console.log("After onSelectChange " + this.form.type);
             // TODO: If type == 'category' then the categories block will be activated
             if (this.form.type == 'main') {
                 this.onCategoryChange(0)
@@ -338,15 +359,11 @@ export default defineComponent({
         },
         onCategoryChange(catID) {
             this.form.category_id = catID;
-            console.log("After onSelectChange " + this.form.category_id);
             // TODO: Call Api TO GET SubCategories
-            console.log("Befor subCategories ", this.subCategories);
             this.newSubCatData = this.subCategories.filter((ele) => ele.category_id == catID);
-            console.log("After subCategories ", this.newSubCatData);
         },
         onSubCategoryChange(subCatID) {
             this.form.subCategory_id = subCatID;
-            console.log("After onSelectChange " + this.form.subCategory_id);
         }
     },
 });

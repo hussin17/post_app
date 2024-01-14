@@ -55,17 +55,6 @@
                                     class="block mt-2">{{ errors.name }}</ps-label-caption>
                             </div>
 
-                            <!-- Link -->
-                            <div v-for="(coreField, index) in coreFieldFilterSettings.filter((coreField) => coreField.original_field_name === 'link' && coreField.enable === 1 && coreField.is_delete === 0)"
-                                :key="index">
-                                <ps-label class="text-base">{{ $t(coreField.label_name) }}
-                                    <span v-if="coreField.mandatory == 1" class="font-medium text-red-800 ms-1">*</span>
-                                </ps-label>
-                                <ps-input ref="link" type="text" v-model:value="form.link"
-                                    :placeholder="$t(coreField.placeholder)" />
-                                <ps-label-caption v-if="coreField.mandatory == 1" textColor="text-red-500 "
-                                    class="block mt-2">{{ errors.link }}</ps-label-caption>
-                            </div>
                             <!-- Link Type -->
                             <div>
                                 <div v-for="(coreField, index) in coreFieldFilterSettings.filter((coreField) => coreField.original_field_name === 'link_type' && coreField.enable === 1 && coreField.is_delete === 0)"
@@ -81,13 +70,25 @@
                                 </div>
                             </div>
 
+                            <!-- Link -->
+                            <div v-for="(coreField, index) in coreFieldFilterSettings.filter((coreField) => coreField.original_field_name === 'link' && coreField.enable === 1 && coreField.is_delete === 0)"
+                                :key="index" v-if="form.link_type == 'outer'">
+                                <ps-label class="text-base">{{ $t(coreField.label_name) }}
+                                    <span v-if="coreField.mandatory == 1" class="font-medium text-red-800 ms-1">*</span>
+                                </ps-label>
+                                <ps-input required ref="link" type="text" v-model:value="form.link"
+                                    :placeholder="$t(coreField.placeholder)" />
+                                <ps-label-caption v-if="coreField.mandatory == 1" textColor="text-red-500 "
+                                    class="block mt-2">{{ errors.link }}</ps-label-caption>
+                            </div>
+
                             <!-- banner type -->
                             <div v-for="(coreField, index) in coreFieldFilterSettings.filter((coreField) => coreField.original_field_name === 'type' && coreField.enable === 1 && coreField.is_delete === 0)"
                                 :key="index">
                                 <ps-label class="text-base">{{ $t(coreField.label_name) }}
                                     <span v-if="coreField.mandatory == 1" class="font-medium text-red-800 ms-1">*</span>
                                 </ps-label>
-                                <select style="width: 100%; border: 1px solid #DDD;" v-model="form.type"
+                                <select required style="width: 100%; border: 1px solid #DDD;" v-model="form.type"
                                     @change="onTypeChange()" :placeholder="$t(coreField.placeholder)">
                                     <option value="main">رئيسي</option>
                                     <option value="category">قسم</option>
@@ -102,9 +103,26 @@
                                 <ps-label class="text-base">{{ $t(coreField.label_name) }}
                                     <span v-if="coreField.mandatory == 1" class="font-medium text-red-800 ms-1">*</span>
                                 </ps-label>
-                                <select style="width: 100%; border: 1px solid #DDD;" v-model="form.category_id"
-                                    @change="onCategoryChange(catID)">
+                                <select required style="width: 100%; border: 1px solid #DDD;" v-model="form.category_id"
+                                    @change="onCategoryChange(form.category_id)">
+                                    <option value="">اختر...</option>
                                     <option v-for="category in categories" :value="category.id">{{ category.name }}
+                                    </option>
+                                </select>
+                            </div>
+
+                            <!-- subCategory_id -->
+                            <div id="subcatID"
+                                v-for="(coreField, index) in coreFieldFilterSettings.filter((coreField) => coreField.original_field_name === 'subCategory_id' && coreField.enable === 1 && coreField.is_delete === 0)"
+                                :key="index" v-if="newSubCatData.length > 0" class="d-none">
+                                <ps-label class="text-base">{{ $t(coreField.label_name) }}
+                                    <span v-if="coreField.mandatory == 1" class="font-medium text-red-800 ms-1">*</span>
+                                </ps-label>
+                                <select required style="width: 100%" v-model="form.subCategory_id"
+                                    @change="onSubCategoryChange(form.subCategory_id)">
+                                    <option value="">اختر...</option>
+                                    <option v-for="category in newSubCatData" :value="category.id">
+                                        {{ category.name }}
                                     </option>
                                 </select>
                             </div>
@@ -222,7 +240,6 @@ import PsTextarea from '@/Components/Core/Textarea/PsTextarea.vue';
 import PsDropdown from "@/Components/Core/Dropdown/PsDropdown.vue";
 import PsDropdownSelect from "@/Components/Core/Dropdown/PsDropdownSelect.vue";
 import { trans } from 'laravel-vue-i18n';
-import PsDropDownSelectMenu from '@/Components/Core/Dropdown/PsDropDownSelectMenu.vue';
 
 export default defineComponent({
     name: "Edit",
@@ -248,7 +265,7 @@ export default defineComponent({
         PsDropdownSelect
     },
     layout: PsLayout,
-    props: ['errors', 'blog', "cities", 'categories', "coreFieldFilterSettings", 'validation'],
+    props: ['errors', 'blog', "cities", 'categories', 'subCategories', "coreFieldFilterSettings", 'validation'],
     data() {
         return {
             location_city: ""
@@ -263,6 +280,7 @@ export default defineComponent({
         const name = ref();
         const location_city_id = ref();
         const description = ref();
+        let newSubCatData = ref([]);
 
         // Client Side Validation
         const { isEmpty, minLength } = useValidators();
@@ -290,6 +308,7 @@ export default defineComponent({
             link_type: props.blog.link_type,
             type: props.blog.type,
             category_id: props.blog.category_id,
+            subCategory_id: props.blog.subCategory_id,
             description: props.blog.description,
             // location_city_id: props.blog.location_city_id,
             location_city_id: props.cities.find(element => element.id == props.blog.location_city_id) ? props.blog.location_city_id : '',
@@ -297,6 +316,10 @@ export default defineComponent({
             cover: '',
             "_method": "put"
         })
+
+        // if (form.category_id) {
+        //     newSubCatData = subCategories.filter((ele) => ele.category_id == form.category_id);
+        // }
 
         function handleSubmit(id) {
             this.$inertia.post(route("blog.update", id), form, {
@@ -369,7 +392,7 @@ export default defineComponent({
             );
         }
 
-        return { validateNameInput, validateEmptyInput, description, location_city_id, handleSubmit, ps_action_modal, form, loading, success, replaceImageClicked, ps_danger_dialog, ps_image_icon_modal }
+        return { validateNameInput, validateEmptyInput, description, location_city_id, handleSubmit, ps_action_modal, form, loading, success, replaceImageClicked, ps_danger_dialog, ps_image_icon_modal, newSubCatData }
     },
     computed: {
         breadcrumb() {
@@ -387,20 +410,38 @@ export default defineComponent({
                     color: "text-primary-500"
                 }
             ]
-
         }
     },
+
     methods: {
         handleCancel() {
             this.$inertia.get(route('blog.index'));
         },
-        onTypeChange() {
-            console.log(this.form.type, this.form.category_id);
+        // Link Type
+        onSelectChange(link_type) {
+            this.form.link_type = link_type;
+        },
+        onTypeChange(type) {
+            this.form.type = type;
+            // TODO: If type == 'category' then the categories block will be activated
             if (this.form.type == 'main') {
-                this.form.category_id = 0
+                this.onCategoryChange(0)
             }
-            console.log(this.form.type, this.form.category_id);
+        },
+        onCategoryChange(catID) {
+            this.form.category_id = catID;
+            // TODO: Call Api TO GET SubCategories
+            console.log(this.newSubCatData, this.subCategories, 'Befor');
+            this.newSubCatData = this.subCategories.filter((ele) => ele.category_id == catID);
+            if (this.newSubCatData.length == 0) {
+                this.onSubCategoryChange(0);
+            }
+            console.log(this.newSubCatData, this.subCategories, 'After');
+        },
+        onSubCategoryChange(subCatID) {
+            this.form.subCategory_id = subCatID;
         }
+
     },
 })
 </script>

@@ -49,7 +49,7 @@ class BlogService extends PsService
         $this->delete = Constants::delete;
         $this->unDelete = Constants::unDelete;
 
-        $this->blogApiRelation = ['city', 'cover'];
+        $this->blogApiRelation = ['city', 'cover', 'category', 'subCategory'];
         $this->coverImgType = 'blog';
 
         $this->noContentStatusCode = Constants::noContentStatusCode;
@@ -205,8 +205,9 @@ class BlogService extends PsService
         }
     }
 
-    public function getBlogs($relation = null, $status = null, $limit = null, $offset = null, $noPagination = null,  $pagPerPage = null, $conds = null)
+    public function getBlogs($relation = null, $status = null, $limit = null, $offset = null, $noPagination = null,  $pagPerPage = null, $conds = null, $plateform = null)
     {
+        $conds['plateform'] = $plateform;
 
         $sort = '';
         if (isset($conds['order_by'])) {
@@ -235,21 +236,25 @@ class BlogService extends PsService
                 $query = $this->searching($query, $conds);
             })
             ->when(empty($sort), function ($query, $conds) {
-                $query->orderBy($this->tableName . '.added_date', 'desc')->orderBy($this->tableName . '.' . $this->blogStatusCol, 'desc')->orderBy($this->tableName . '.' . $this->blogNameCol, 'asc');
+                $query->orderBy($this->tableName . '.' . 'added_date', 'desc')
+                    ->orderBy($this->tableName . '.' . $this->blogStatusCol, 'desc')
+                    ->orderBy($this->tableName . '.' . $this->blogNameCol, 'asc');
             });
 
         if ($pagPerPage) {
             $blogs = $blogs->paginate($pagPerPage)->onEachSide(1)->withQueryString();
         } elseif ($noPagination) {
             $blogs = $blogs->get();
+        } else {
+            $blogs = $blogs->get();
         }
 
+        // return ['query' => $query, 'conds' => $conds];
         return $blogs;
     }
 
     public function searching($query, $conds)
     {
-
         // search term
         if (isset($conds['searchterm']) && $conds['searchterm']) {
             $search = $conds['searchterm'];
@@ -269,10 +274,13 @@ class BlogService extends PsService
             $query->where($this->tableName . '.' . $this->itmAddedUserIdCol, $conds['added_user_id']);
         }
 
-        if (isset($conds['category_id'])) {
+        if (isset($conds['category_id']) && $conds['category_id']) {
             $query->where($this->tableName . '.' . 'category_id', $conds['category_id']);
+        } elseif (isset($conds['category_id']) == false && $conds['plateform'] == 'mobile') {
+            $query->where($this->tableName . '.' . 'type', 'main');
         }
-        if (isset($conds['subCategory_id'])) {
+
+        if (isset($conds['subCategory_id']) && $conds['subCategory_id']) {
             $query->where($this->tableName . '.' . 'subCategory_id', $conds['subCategory_id']);
         }
 
@@ -330,13 +338,13 @@ class BlogService extends PsService
         // check permission
         //$checkPermission = $this->checkPermission($this->viewAnyAbility, Blog::class, "admin.index");
 
-
         // search filter
         $conds['searchterm'] = $request->input('search') ?? '';
         $conds['location_city_id'] = $request->input('city_filter') == "all" ? null : $request->city_filter;
 
         $conds['order_by'] = null;
         $conds['order_type'] = null;
+        $plateform = 'web';
         $row = $request->input('row') ?? Constants::dataTableDefaultRow;
 
         if ($request->sort_field) {
@@ -345,7 +353,7 @@ class BlogService extends PsService
         }
 
         $relations = ['city', 'owner', 'editor'];
-        $blogs = BlogWithKeyResource::collection($this->getBlogs($relations, null, null, null, false,  $row, $conds));
+        $blogs = BlogWithKeyResource::collection($this->getBlogs(relation: $relations, noPagination: false, pagPerPage: $row, conds: $conds, plateform: $plateform));
 
 
         // taking for column and columnFilterOption
@@ -391,14 +399,14 @@ class BlogService extends PsService
     {
         $code = $this->code;
         $coreFieldFilterSettings = $this->getCoreFieldFilteredLists($code);
-        $dataWithRelation = ['cover', 'city', 'category'];
+        $dataWithRelation = ['cover', 'city', 'category', 'subCategory'];
         $blog = $this->getBlog($id, $dataWithRelation);
         // check permission start
         // $checkPermission = $this->checkPermission($this->editAbility, $blog, "admin.index");
         // check permission end
         $cities = $this->locationCityService->getLocationCityList(null, $this->publish);
         $categories = $this->categoryService->getCategories(null, $this->publish);
-
+        $subCategories = $this->subCategoryService->getSubcategories(null, $this->publish);
         $conds = [
             'module_name' => Constants::blog,
             'enable' => 1,
@@ -421,6 +429,7 @@ class BlogService extends PsService
             "blog" => $blog,
             "cities" => $cities,
             "categories" => $categories,
+            'subCategories' => $subCategories,
             'coreFieldFilterSettings' => $coreFieldFilterSettings,
             'validation' => $validation
         ];
@@ -625,7 +634,7 @@ class BlogService extends PsService
     }
 
 
-    public function searchFromApi($request)
+    public function searchFromApi($request) // Request from Search Function
     {
         $offset = $request->offset;
         $limit = $request->limit;
@@ -643,7 +652,7 @@ class BlogService extends PsService
         $conds['subCategory_id'] = $request->subCategory_id;
 
         $blogApiRelation = $this->blogApiRelation;
-        $blogs = $this->getBlogs($blogApiRelation, $this->publish, $limit, $offset, $conds);
+        $blogs = $this->getBlogs(relation: $blogApiRelation, status: $this->publish, limit: $limit, offset: $offset, conds: $conds, plateform: 'mobile');
 
         return $blogs;
     }

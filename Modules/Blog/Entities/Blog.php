@@ -11,6 +11,7 @@ use Modules\Core\Entities\CoreImage;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Support\Facades\Gate;
 use Modules\Core\Entities\Category;
+use Modules\Core\Entities\Subcategory;
 
 class Blog extends Model
 {
@@ -43,6 +44,10 @@ class Blog extends Model
     public function category()
     {
         return $this->belongsTo(Category::class, 'category_id');
+    }
+    public function subCategory()
+    {
+        return $this->belongsTo(Subcategory::class, 'subCategory_id');
     }
 
     public function shop()
